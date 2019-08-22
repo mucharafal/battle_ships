@@ -2,6 +2,7 @@ import FieldState._
 
 object BoardPrinter {
   def printBoard(board: Array[Array[FieldState]]) {
+    //todo add print coordinates/grid???
     val boardSize = board.length
     for(x <- 0 until boardSize) {
       for(y <- 0 until boardSize) {

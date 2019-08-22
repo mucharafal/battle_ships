@@ -41,6 +41,7 @@ class PlayerCLI extends Player {
           return board
         }
       }
+      BoardPrinter.printBoard(board.getViewForOwner)
       askForAction() match {
         case Action.AddShip => addShip(board)
         case Action.RemoveShip => removeShip(board)
@@ -75,8 +76,8 @@ class PlayerCLI extends Player {
   def askForDirection: Direction = {
     println("Direction- horizontal(h) or vertical(v)?")
     StdIn.readChar() match {
-      case "h" => Direction.Horizontal
-      case "v" => Direction.Vertical
+      case 'h' => Direction.Horizontal
+      case 'v' => Direction.Vertical
       case _ => askForDirection
     }
   }

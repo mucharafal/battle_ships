@@ -8,14 +8,37 @@ class Board {
   var ships: List[Ship] = List.empty
   var enemyHits: Array[Array[Boolean]] = createFieldsForBoard(boardSize)
   def addShip(ship: Ship): Boolean = {
-    if(!collide(ship) &&
+    if(
       canShipWithGivenLengthBeAdded(ship.length) &&
-      isInBoard(ship)) {
+      isInBoard(ship) &&
+      isNotTooClose(ship)
+    ) {
       ships = ship :: ships
       true
     } else {
       false
     }
+  }
+
+  def isNotTooClose(ship: Ship): Boolean = {
+    val x_begin = ship.positionX - 1
+    val y_begin = ship.positionY - 1
+    val x_end = ship.direction match {
+      case Horizontal => ship.positionX + ship.length
+      case Vertical => ship.positionX + 1
+    }
+    val y_end = ship.direction match {
+      case Horizontal => ship.positionY + 1
+      case Vertical => ship.positionY + ship.length
+    }
+    for(x <- x_begin to x_end){
+      for(y <- y_begin to y_end){
+        if(ships.exists(_.isIn(x, y))) {
+          return false
+        }
+      }
+    }
+    return true
   }
 
   def isAlive: Boolean = {
