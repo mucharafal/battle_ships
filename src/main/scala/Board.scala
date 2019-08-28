@@ -24,12 +24,12 @@ class Board {
     val x_begin = ship.positionX - 1
     val y_begin = ship.positionY - 1
     val x_end = ship.direction match {
-      case Horizontal => ship.positionX + ship.length
-      case Vertical => ship.positionX + 1
+      case Vertical => ship.positionX + ship.length
+      case Horizontal => ship.positionX + 1
     }
     val y_end = ship.direction match {
-      case Horizontal => ship.positionY + 1
-      case Vertical => ship.positionY + ship.length
+      case Vertical => ship.positionY + 1
+      case Horizontal => ship.positionY + ship.length
     }
     for(x <- x_begin to x_end){
       for(y <- y_begin to y_end){
@@ -38,7 +38,7 @@ class Board {
         }
       }
     }
-    return true
+    true
   }
 
   def isAlive: Boolean = {
@@ -46,7 +46,7 @@ class Board {
   }
 
   def deleteShip(ship: Ship): Unit ={
-    ships = ships.filter(_ == ship)
+    ships = ships.filter(_ != ship)
   }
 
   def collide(ship: Ship): Boolean = {

@@ -2,9 +2,12 @@ import FieldState._
 
 object BoardPrinter {
   def printBoard(board: Array[Array[FieldState]]) {
-    //todo add print coordinates/grid???
     val boardSize = board.length
+    print(" ")
+    (0 until boardSize).foreach(print(_))
+    println()
     for(x <- 0 until boardSize) {
+      print(x)
       for(y <- 0 until boardSize) {
         val sign = board(x)(y) match {
           case Empty => " "

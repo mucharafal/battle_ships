@@ -53,7 +53,7 @@ class PlayerCLI extends Player {
   def askFor(question: String): Boolean = {
     println(question + " Answer: y/n")
     val answer = StdIn.readChar()
-    answer == "y"
+    answer == 'y'
   }
 
   def askForAction(): Action = {
