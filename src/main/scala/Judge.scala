@@ -1,4 +1,4 @@
-import HitState._
+import scala.annotation.tailrec
 
 class Judge(player1: Player, player2: Player) {
   def processGame(): Unit = {
@@ -8,22 +8,24 @@ class Judge(player1: Player, player2: Player) {
     proceedGame(player1, player2, boardPlayer1, boardPlayer2)
   }
 
-  def proceedGame(playerWithMove: Player, waitingPlayer: Player, boardPlayerWithMove: Board,
+  @tailrec final def proceedGame(playerWithMove: Player, waitingPlayer: Player, boardPlayerWithMove: Board,
                   boardWaitingPlayer: Board) {
     boardPlayerWithMove.isAlive match {
       case true if boardWaitingPlayer.isAlive =>
         makeMove(playerWithMove, boardWaitingPlayer) match {
-          case Hit =>
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
+          case Hit(x, y) =>
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
+            playerWithMove.shipHit(x, y)
+            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
           case Sunk =>
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
             playerWithMove.shipIsSunk()
-          case Miss =>
-            proceedGame(waitingPlayer, playerWithMove, boardWaitingPlayer, boardPlayerWithMove)
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
+            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
+          case Miss =>
+            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
+            proceedGame(waitingPlayer, playerWithMove, boardWaitingPlayer, boardPlayerWithMove)
           case Incorrect =>
+            print("Incorrect")
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
         }
       case true =>

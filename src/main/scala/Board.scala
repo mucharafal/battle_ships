@@ -1,6 +1,5 @@
 import FieldState._
 import Direction._
-import HitState.HitState
 
 class Board {
   import Board._
@@ -64,8 +63,8 @@ class Board {
   def isInBoard(ship: Ship): Boolean = {
     ship.positionX < boardSize && ship.positionY < boardSize &&
       (ship.direction match {
-      case Vertical => ship.positionY + ship.length < boardSize
-      case Horizontal => ship.positionX + ship.length < boardSize
+      case Horizontal => ship.positionY + ship.length - 1 < boardSize
+      case Vertical => ship.positionX + ship.length - 1 < boardSize
     })
   }
 
@@ -92,19 +91,37 @@ class Board {
 
   def shotOn(x: Int, y: Int): HitState = {
     if(enemyHits(x)(y)) {
-      HitState.Incorrect
+      Incorrect
     } else {
       enemyHits(x)(y) = true
       val optionShip = ships.find(_.isIn(x, y))
       optionShip match {
-        case None => HitState.Miss
+        case None => Miss
         case Some(ship) =>
           if (isShipAlive(ship)) {
-            HitState.Hit
+            Hit(x, y)
           } else {
-            HitState.Sunk
+            aroundSunkShipWithHits(ship)
+            Sunk
           }
       }
+    }
+  }
+
+  def aroundSunkShipWithHits(ship: Ship): Unit = {
+    ship.direction match {
+      case Horizontal =>
+        for(x <- Math.max(0, ship.positionX - 1) to Math.min(boardSize-1, ship.positionX + 1)) {
+          for(y <- Math.max(0, ship.positionY - 1) to Math.min(boardSize-1, ship.positionY + ship.length)) {
+            enemyHits(x)(y) = true
+          }
+        }
+      case Vertical =>
+        for(x <- Math.max(0, ship.positionX - 1) to Math.min(boardSize-1, ship.positionX + ship.length)) {
+          for(y <- Math.max(0, ship.positionY - 1) to Math.min(boardSize-1, ship.positionY + 1)) {
+            enemyHits(x)(y) = true
+          }
+        }
     }
   }
 
@@ -114,7 +131,7 @@ class Board {
 
   def isShipAlive(ship: Ship): Boolean = {
     val coordinates = ship.getListOfFieldsCooridinates
-    coordinates.forall(coordinate => enemyHits(coordinate._1)(coordinate._2))
+    coordinates.exists(coordinate => !enemyHits(coordinate._1)(coordinate._2))
   }
 
   def isReady: Boolean = {

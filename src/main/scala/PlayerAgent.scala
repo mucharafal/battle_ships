@@ -39,15 +39,18 @@ class PlayerAgent extends Player {
   }
 
   override def shipHit(positionX: Int, positionY: Int): Unit = {
+    println("Hit!- " + number)
     state = state match {
       case RandomShooter() => GetDirectionShooter(positionX, positionY)
       case GetDirectionShooter(past_x, _) if past_x == positionX =>
-        FinishInDirectionShooter(positionX, positionY, Vertical)
-      case GetDirectionShooter(_, _) => FinishInDirectionShooter(positionX, positionY, Horizontal)
+        FinishInDirectionShooter(positionX, positionY, Horizontal)
+      case GetDirectionShooter(_, _) => FinishInDirectionShooter(positionX, positionY, Vertical)
+      case x => x
     }
   }
 
   override def shipIsSunk(): Unit = {
+    println("Sunk- " + number)
     state = RandomShooter()
   }
 
@@ -61,7 +64,7 @@ trait Shooter {
   def canGiveShot(x: Int, y: Int, enemyBoard: Array[Array[FieldState]]): Boolean = {
     x >= 0 && x < enemyBoard.length &&
       y >= 0 && y < enemyBoard.length &&
-      (enemyBoard(x)(y) == FieldState.Empty || enemyBoard(x)(y) == FieldState.SunkShip)
+      enemyBoard(x)(y) == FieldState.Empty
   }
 }
 
@@ -114,10 +117,10 @@ case class FinishInDirectionShooter(x: Int, y: Int, direction: Direction) extend
   }
 
   def maxPositionDown(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    val x = begin_x
-    var y = begin_y + 1
-    while(!canGiveShot(x, y, enemyBoard) && y < enemyBoard.length) {
-      y += 1
+    val y = begin_y
+    var x = begin_x + 1
+    while(x - 1 < enemyBoard.length && enemyBoard(x)(y) == FieldState.SunkShip) {
+      x += 1
     }
     if(canGiveShot(x, y, enemyBoard)) {
       (x, y)
@@ -127,22 +130,9 @@ case class FinishInDirectionShooter(x: Int, y: Int, direction: Direction) extend
   }
 
   def maxPositionUp(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    val x = begin_x
-    var y = begin_y - 1
-    while(!canGiveShot(x, y, enemyBoard) && y < enemyBoard.length) {
-      y -= 1
-    }
-    if(canGiveShot(x, y, enemyBoard)) {
-      (x, y)
-    } else {
-      null
-    }
-  }
-
-  def maxPositionOnLeft(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
     val y = begin_y
     var x = begin_x - 1
-    while(!canGiveShot(x, y, enemyBoard) && y < enemyBoard.length) {
+    while(x > 0 && enemyBoard(x)(y) == FieldState.SunkShip) {
       x -= 1
     }
     if(canGiveShot(x, y, enemyBoard)) {
@@ -152,11 +142,24 @@ case class FinishInDirectionShooter(x: Int, y: Int, direction: Direction) extend
     }
   }
 
+  def maxPositionOnLeft(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
+    var y = begin_y - 1
+    val x = begin_x
+    while(y > 0 && enemyBoard(x)(y) == FieldState.SunkShip) {
+      y -= 1
+    }
+    if(canGiveShot(x, y, enemyBoard)) {
+      (x, y)
+    } else {
+      null
+    }
+  }
+
   def maxPositionOnRight(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    val y = begin_y
-    var x = begin_x + 1
-    while(!canGiveShot(x, y, enemyBoard) && y < enemyBoard.length) {
-      x += 1
+    var y = begin_y + 1
+    val x = begin_x
+    while(y - 1 < enemyBoard.length && enemyBoard(x)(y) == FieldState.SunkShip) {
+      y += 1
     }
     if(canGiveShot(x, y, enemyBoard)) {
       (x, y)

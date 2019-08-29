@@ -42,4 +42,19 @@ class BoardTest extends FlatSpec{
     board.enemyHits(0)(1) = true
     assert(!board.isShipAlive(ship))
   }
+
+  "collide" should "work" in {
+    val board = new Board()
+    val ship = Ship(2, 1, 0, Horizontal)
+    board.addShip(ship)
+    assert(board.collide(Ship(2, 0, 1, Vertical)))
+  }
+
+  "isInBoard" should "work" in {
+    val board = new Board()
+    val ship = Ship(4, 9, 0, Horizontal)
+    assert(board.isInBoard(ship))
+    assert(board.isInBoard(Ship(3, 7, 7, Vertical)))
+    assert(!board.isInBoard(Ship(2, 9, 9, Vertical)))
+  }
 }

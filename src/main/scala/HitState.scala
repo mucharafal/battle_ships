@@ -1,4 +1,5 @@
-object HitState extends Enumeration {
-  type HitState = Value
-  val Hit, Sunk, Miss, Incorrect = Value
-}
+sealed trait HitState
+case class Hit(x: Int, y: Int) extends HitState
+case object Sunk extends HitState
+case object Miss extends HitState
+case object Incorrect extends HitState
