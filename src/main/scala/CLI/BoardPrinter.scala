@@ -5,11 +5,15 @@ import Engine.FieldState.{AliveShip, Empty, FieldState, MissShot, SunkShip}
 object BoardPrinter {
   def printBoard(board: Array[Array[FieldState]]) {
     val boardSize = board.length
-    print(" ")
+    print(" Y")
     (0 until boardSize).foreach(print(_))
     println()
+    print("Xr")
+    (0 until boardSize).foreach(_ => print("-"))
+
+    println()
     for(x <- 0 until boardSize) {
-      print(x)
+      print(x + "|")
       for(y <- 0 until boardSize) {
         val sign = board(x)(y) match {
           case Empty => " "
