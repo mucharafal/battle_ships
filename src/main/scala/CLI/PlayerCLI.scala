@@ -1,6 +1,9 @@
-import Action.Action
-import Direction.Direction
-import FieldState.FieldState
+package CLI
+
+import CLI.Action.Action
+import Engine.Direction.Direction
+import Engine.FieldState.FieldState
+import Engine.{Board, Direction, Player, Ship}
 
 import scala.io.StdIn
 class PlayerCLI extends Player {
@@ -37,7 +40,7 @@ class PlayerCLI extends Player {
     val board: Board = new Board()
     while(true) {
       if(board.isReady) {
-        if(askFor("Board is ready. Would like to start game?")) {
+        if(askFor("Engine.Board is ready. Would like to start game?")) {
           return board
         }
       }
@@ -94,7 +97,7 @@ class PlayerCLI extends Player {
 
     val ship = Ship(length, coordinates._1, coordinates._2, direction)
     if(board.addShip(ship)) {
-      println("Ship added successfully")
+      println("Engine.Ship added successfully")
     } else {
       println("Cannot add ship")
     }

@@ -1,4 +1,6 @@
-import org.scalatest.{FlatSpec, FunSuite}
+import AI.RandomShooter
+import Engine.FieldState
+import org.scalatest.{FlatSpec}
 
 class RandomShooterTest extends FlatSpec {
 

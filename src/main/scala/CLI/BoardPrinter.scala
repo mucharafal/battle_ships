@@ -1,4 +1,6 @@
-import FieldState._
+package CLI
+
+import Engine.FieldState.{AliveShip, Empty, FieldState, MissShot, SunkShip}
 
 object BoardPrinter {
   def printBoard(board: Array[Array[FieldState]]) {

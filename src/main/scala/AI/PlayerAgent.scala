@@ -1,5 +1,10 @@
-import FieldState.FieldState
-import Direction._
+package AI
+
+import CLI.BoardPrinter
+import Engine.Direction._
+import Engine.FieldState.FieldState
+import Engine.{Board, FieldState, Player, Ship}
+
 import scala.util.Random
 class PlayerAgent extends Player {
   var state: Shooter = RandomShooter()

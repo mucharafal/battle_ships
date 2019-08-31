@@ -1,4 +1,6 @@
-import org.scalatest.{FlatSpec}
+import AI.GetDirectionShooter
+import Engine.FieldState
+import org.scalatest.FlatSpec
 
 class GetDirectionShooterTest extends FlatSpec {
   "make shot" should "work" in {

@@ -1,8 +1,9 @@
 import org.scalatest.FlatSpec
-import Direction._
+import Engine.Direction._
+import Engine.{Board, Ship}
 
 class BoardTest extends FlatSpec{
-  "Board " should "add ship on" in {
+  "Engine.Board " should "add ship on" in {
     val board: Board = new Board()
     val ship: Ship = Ship(4, 0, 0, Horizontal)
     assert(board.addShip(ship))

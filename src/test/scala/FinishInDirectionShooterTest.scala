@@ -1,3 +1,5 @@
+import AI.FinishInDirectionShooter
+import Engine.{Direction, FieldState}
 import org.scalatest.{FlatSpec, FunSuite}
 
 class FinishInDirectionShooterTest extends FlatSpec {

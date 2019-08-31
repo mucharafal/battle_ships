@@ -1,3 +1,5 @@
+package Engine
+
 import scala.annotation.tailrec
 
 class Judge(player1: Player, player2: Player) {

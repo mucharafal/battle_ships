@@ -1,5 +1,6 @@
-import Direction._
+package Engine
 
+import Engine.Direction.{Direction, Horizontal, Vertical}
 
 case class Ship(length: Int,
                 positionX: Int, positionY: Int, direction: Direction) {
@@ -34,4 +35,3 @@ case class Ship(length: Int,
 
 
 }
-

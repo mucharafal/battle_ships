@@ -1,4 +1,6 @@
-import FieldState.FieldState
+package Engine
+
+import Engine.FieldState.FieldState
 
 trait Player {
   def generateNewBoard(): Board

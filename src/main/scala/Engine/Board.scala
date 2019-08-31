@@ -1,5 +1,7 @@
-import FieldState._
-import Direction._
+package Engine
+
+import Engine.Direction._
+import Engine.FieldState._
 
 class Board {
   import Board._
