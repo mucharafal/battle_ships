@@ -16,15 +16,15 @@ class Judge(player1: Player, player2: Player) {
       case true if boardWaitingPlayer.isAlive =>
         makeMove(playerWithMove, boardWaitingPlayer) match {
           case Hit(x, y) =>
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
             playerWithMove.shipHit(x, y)
+            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
           case Sunk =>
             playerWithMove.shipIsSunk()
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
+            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
           case Miss =>
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForOwner)
+            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
             proceedGame(waitingPlayer, playerWithMove, boardWaitingPlayer, boardPlayerWithMove)
           case Incorrect =>
             print("Incorrect")

@@ -24,7 +24,7 @@ class PlayerAgent extends Player {
     for(length <- 1 to 4) {
       val numberOfUnits = Board.getMaximumNumberOfShips(length)
       for(_ <- 0 until numberOfUnits) {
-        var ship: Ship = null
+        var ship: Option[Ship] = None
         do {
           val x = random.nextInt(10)
           val y = random.nextInt(10)
@@ -33,9 +33,9 @@ class PlayerAgent extends Player {
           } else {
             Vertical
           }
-          ship = Ship(length, x, y, direction)
+          ship = Some(Ship(length, x, y, direction))
         }
-        while(!board.addShip(ship))
+        while(!board.addShip(ship.get))
       }
     }
     println(number)
@@ -110,66 +110,54 @@ case class FinishInDirectionShooter(x: Int, y: Int, direction: Direction) extend
     direction match {
       case Horizontal =>
         maxPositionOnLeft(enemyBoard, x, y) match {
-          case null => maxPositionOnRight(enemyBoard, x, y)
-          case position => position
+          case None => maxPositionOnRight(enemyBoard, x, y).get
+          case Some(position) => position
         }
       case Vertical =>
         maxPositionUp(enemyBoard, x, y) match {
-          case null => maxPositionDown(enemyBoard, x, y)
-          case position => position
+          case None => maxPositionDown(enemyBoard, x, y).get
+          case Some(position) => position
         }
     }
   }
 
-  def maxPositionDown(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    val y = begin_y
-    var x = begin_x + 1
-    while(x - 1 < enemyBoard.length && enemyBoard(x)(y) == FieldState.SunkShip) {
-      x += 1
+  def maxPositionDown(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): Option[(Int, Int)] = {
+    val stepDown = (position: (Int, Int)) => (position._1 + 1, position._2)
+    maxPositionInDirection(enemyBoard, begin_x, begin_y, stepDown)
+  }
+
+  def maxPositionUp(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): Option[(Int, Int)] = {
+    val stepUp = (position: (Int, Int)) => (position._1 - 1, position._2)
+    maxPositionInDirection(enemyBoard, begin_x, begin_y, stepUp)
+  }
+
+  def maxPositionOnLeft(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): Option[(Int, Int)] = {
+    val stepLeft = (position: (Int, Int)) => (position._1, position._2 - 1)
+    maxPositionInDirection(enemyBoard, begin_x, begin_y, stepLeft)
+  }
+
+  def maxPositionOnRight(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): Option[(Int, Int)] = {
+    val stepRight = (position: (Int, Int)) => (position._1, position._2 + 1)
+    maxPositionInDirection(enemyBoard, begin_x, begin_y, stepRight)
+  }
+
+  def maxPositionInDirection(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int,
+                             nextStep: ((Int, Int)) => (Int, Int)): Option[(Int, Int)] = {
+    var nextPosition = nextStep((begin_x, begin_y))
+    while(insideBoard(nextPosition, enemyBoard.length) && enemyBoard(nextPosition._1)(nextPosition._2) == FieldState.SunkShip) {
+      nextPosition = nextStep(nextPosition)
     }
-    if(canGiveShot(x, y, enemyBoard)) {
-      (x, y)
+    if(canGiveShot(nextPosition._1, nextPosition._2, enemyBoard)) {
+      Some(nextPosition)
     } else {
-      null
+      None
     }
   }
 
-  def maxPositionUp(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    val y = begin_y
-    var x = begin_x - 1
-    while(x > 0 && enemyBoard(x)(y) == FieldState.SunkShip) {
-      x -= 1
-    }
-    if(canGiveShot(x, y, enemyBoard)) {
-      (x, y)
-    } else {
-      null
-    }
-  }
-
-  def maxPositionOnLeft(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    var y = begin_y - 1
-    val x = begin_x
-    while(y > 0 && enemyBoard(x)(y) == FieldState.SunkShip) {
-      y -= 1
-    }
-    if(canGiveShot(x, y, enemyBoard)) {
-      (x, y)
-    } else {
-      null
-    }
-  }
-
-  def maxPositionOnRight(enemyBoard: Array[Array[FieldState]], begin_x: Int, begin_y: Int): (Int, Int) = {
-    var y = begin_y + 1
-    val x = begin_x
-    while(y - 1 < enemyBoard.length && enemyBoard(x)(y) == FieldState.SunkShip) {
-      y += 1
-    }
-    if(canGiveShot(x, y, enemyBoard)) {
-      (x, y)
-    } else {
-      null
-    }
+  def insideBoard(position: (Int, Int), boardSize: Int): Boolean = {
+    val x = position._1
+    val y = position._2
+    val inside = (p: Int) => p >= 0 && p < boardSize
+    inside(x) && inside(y)
   }
 }
