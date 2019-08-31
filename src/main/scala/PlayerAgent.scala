@@ -45,7 +45,7 @@ class PlayerAgent extends Player {
       case GetDirectionShooter(past_x, _) if past_x == positionX =>
         FinishInDirectionShooter(positionX, positionY, Horizontal)
       case GetDirectionShooter(_, _) => FinishInDirectionShooter(positionX, positionY, Vertical)
-      case x => x
+      case x: FinishInDirectionShooter => x
     }
   }
 
