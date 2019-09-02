@@ -1,6 +1,5 @@
 package AI
 
-import CLI.BoardPrinter
 import Engine.Direction._
 import Engine.FieldState.FieldState
 import Engine.{Board, FieldState, Player, Ship}
@@ -14,8 +13,6 @@ class PlayerAgent extends Player {
   }
 
   override def enemyShot(ownBoard: Array[Array[FieldState]]): Unit = {
-    println(number)
-    BoardPrinter.printBoard(ownBoard)
   }
 
   override def generateNewBoard(): Board = {
@@ -38,24 +35,20 @@ class PlayerAgent extends Player {
         while(!board.addShip(ship.get))
       }
     }
-    println(number)
-    BoardPrinter.printBoard(board.getViewForOwner)
     board
   }
 
   override def shipHit(positionX: Int, positionY: Int): Unit = {
-    println("Hit!- " + number)
     state = state match {
-      case RandomShooter() => GetDirectionShooter(positionX, positionY)
-      case GetDirectionShooter(past_x, _) if past_x == positionX =>
+      case RandomShooter() => FindDirectionShooter(positionX, positionY)
+      case FindDirectionShooter(past_x, _) if past_x == positionX =>
         FinishInDirectionShooter(positionX, positionY, Horizontal)
-      case GetDirectionShooter(_, _) => FinishInDirectionShooter(positionX, positionY, Vertical)
+      case FindDirectionShooter(_, _) => FinishInDirectionShooter(positionX, positionY, Vertical)
       case x: FinishInDirectionShooter => x
     }
   }
 
   override def shipIsSunk(): Unit = {
-    println("Sunk- " + number)
     state = RandomShooter()
   }
 
@@ -85,7 +78,7 @@ case class RandomShooter() extends Shooter {
   }
 }
 
-case class GetDirectionShooter(x: Int, y: Int) extends Shooter {
+case class FindDirectionShooter(x: Int, y: Int) extends Shooter {
   override def makeShot(enemyBoard: Array[Array[FieldState]]): (Int, Int) = {
     val up = (x, y+1)
     val down = (x, y-1)
