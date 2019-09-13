@@ -7,7 +7,6 @@ object Main {
     val player1 = new PlayerCLI
     val player2 = new PlayerAgent
 
-    val judge = new Judge(player1, player2)
-    judge.processGame()
+    Judge.startGame(player1, player2)
   }
 }

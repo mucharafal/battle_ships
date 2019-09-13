@@ -2,8 +2,8 @@ package Engine
 
 import scala.annotation.tailrec
 
-class Judge(player1: Player, player2: Player) {
-  def processGame(): Unit = {
+object Judge {
+  def startGame(player1: Player, player2: Player): Unit = {
     val boardPlayer1 = player1.generateNewBoard()
     val boardPlayer2 = player2.generateNewBoard()
 
