@@ -8,5 +8,6 @@ trait Player {
   def enemyShot(ownBoard: Array[Array[FieldState]]): Unit
   def shipIsSunk(): Unit
   def shipHit(positionX: Int, positionY: Int): Unit
-  def endGame(win: Boolean): Unit
+  def win()
+  def lost()
 }

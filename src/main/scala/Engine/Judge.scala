@@ -31,11 +31,11 @@ object Judge {
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
         }
       case true =>
-        playerWithMove.endGame(true)
-        waitingPlayer.endGame(false)
+        playerWithMove.win()
+        waitingPlayer.lost()
       case false =>
-        playerWithMove.endGame(false)
-        waitingPlayer.endGame(true)
+        playerWithMove.lost()
+        waitingPlayer.win()
     }
   }
 

@@ -7,12 +7,12 @@ import Engine.{Board, Direction, Player, Ship}
 
 import scala.io.StdIn
 class PlayerCLI extends Player {
-  override def endGame(win: Boolean): Unit = {
-    if(win) {
-      println("You have won!")
-    } else {
-      println("You have lost...")
-    }
+  override def lost(): Unit = {
+    println("You have lost...")
+  }
+
+  override def win(): Unit = {
+    println("You have won!")
   }
 
   override def makeShot(enemyBoard: Array[Array[FieldState]]): (Int, Int) = {

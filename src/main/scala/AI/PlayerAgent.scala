@@ -8,8 +8,11 @@ import scala.util.Random
 class PlayerAgent extends Player {
   var state: Shooter = RandomShooter()
   var number: Int = Random.nextInt()
-  override def endGame(win: Boolean): Unit = {
 
+  override def win(): Unit = {
+  }
+
+  override def lost(): Unit = {
   }
 
   override def enemyShot(ownBoard: Array[Array[FieldState]]): Unit = {
