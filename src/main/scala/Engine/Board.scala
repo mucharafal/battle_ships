@@ -3,51 +3,33 @@ package Engine
 import Engine.Direction._
 import Engine.FieldState._
 
-class Board {
+case class Board(ships: List[Ship], enemyHits: EnemyActions) {
   import Board._
-  val boardSize = 10
-  var ships: List[Ship] = List.empty
-  var enemyHits: Array[Array[Boolean]] = createFieldsForBoard(boardSize)
-  def addShip(ship: Ship): Boolean = {
+
+  def addShip(ship: Ship): (Board, Boolean) = {
     if(
       canShipWithGivenLengthBeAdded(ship.length) &&
       isInBoard(ship) &&
-      isNotTooClose(ship)
+      isNotTooCloseToOthers(ship)
     ) {
-      ships = ship :: ships
-      true
+      (Board(ship :: ships, enemyHits), true)
     } else {
-      false
+      (this, false)
     }
   }
 
-  def isNotTooClose(ship: Ship): Boolean = {
-    val x_begin = ship.positionX - 1
-    val y_begin = ship.positionY - 1
-    val x_end = ship.direction match {
-      case Vertical => ship.positionX + ship.length
-      case Horizontal => ship.positionX + 1
-    }
-    val y_end = ship.direction match {
-      case Vertical => ship.positionY + 1
-      case Horizontal => ship.positionY + ship.length
-    }
-    for(x <- x_begin to x_end){
-      for(y <- y_begin to y_end){
-        if(ships.exists(_.isIn(x, y))) {
-          return false
-        }
-      }
-    }
-    true
+  def isNotTooCloseToOthers(ship: Ship): Boolean = {
+    val beginPoint = ship.position.left.up
+    val endPoint = ship.endPoint.right.down
+    !(beginPoint to endPoint).exists(shipIsOnField(_))
   }
 
   def isAlive: Boolean = {
     getViewForOwner.exists(row => row.contains(AliveShip))
   }
 
-  def deleteShip(ship: Ship): Unit ={
-    ships = ships.filter(_ != ship)
+  def deleteShip(ship: Ship): Board ={
+    Board(ships.filter(_ != ship), enemyHits)
   }
 
   def collide(ship: Ship): Boolean = {
@@ -63,11 +45,9 @@ class Board {
   }
 
   def isInBoard(ship: Ship): Boolean = {
-    ship.positionX < boardSize && ship.positionY < boardSize &&
-      (ship.direction match {
-      case Horizontal => ship.positionY + ship.length - 1 < boardSize
-      case Vertical => ship.positionX + ship.length - 1 < boardSize
-    })
+    val insideAxis = (coordinate: Int) => coordinate >= 0 && coordinate < boardSize
+    val insideBoard = (p: Point) => insideAxis(p.x) && insideAxis(p.y)
+    insideBoard(ship.position) && insideBoard(ship.endPoint)
   }
 
   def getViewForEnemy: Array[Array[FieldState]] = {
@@ -76,14 +56,15 @@ class Board {
       case anyOther => anyOther
     })
   }
+
   def getViewForOwner: Array[Array[FieldState]] = {
     val ownerView: Array[Array[FieldState]] = Array.ofDim[FieldState](boardSize, boardSize)
     for(i <- 0 until boardSize) {
       for(j <- 0 until boardSize) {
-        ownerView(i)(j) = enemyHits(i)(j) match {
-          case true if shipIsOnField(i, j) => SunkShip
+        ownerView(i)(j) = enemyHits.wasShotOn(Point(i, j)) match {
+          case true if shipIsOnField(Point(i, j)) => SunkShip
           case true => MissShot
-          case false if shipIsOnField(i, j) => AliveShip
+          case false if shipIsOnField(Point(i, j)) => AliveShip
           case false => Empty
         }
       }
@@ -91,49 +72,52 @@ class Board {
     ownerView
   }
 
-  def shotOn(x: Int, y: Int): HitState = {
-    if(enemyHits(x)(y)) {
-      Incorrect
+  def shotOn(point: Point): (Board, HitState) = {
+    if(enemyHits.wasShotOn(point)) {
+      (this, Incorrect)
     } else {
-      enemyHits(x)(y) = true
-      val optionShip = ships.find(_.isIn(x, y))
+      val newEnemyHits = enemyHits.addShot(point)
+      val newBoard = Board(ships, newEnemyHits)
+      val optionShip = ships.find(_.isIn(point))
       optionShip match {
-        case None => Miss
+        case None => (newBoard, Miss)
         case Some(ship) =>
           if (isShipAlive(ship)) {
-            Hit(x, y)
+            (newBoard, Hit(point))
           } else {
-            aroundSunkShipWithHits(ship)
-            Sunk
+            (aroundSunkShipWithHits(ship), Sunk)
           }
       }
     }
   }
 
-  def aroundSunkShipWithHits(ship: Ship): Unit = {
+  def aroundSunkShipWithHits(ship: Ship): Board = {
+    var newEnemyHits = enemyHits
     ship.direction match {
       case Horizontal =>
-        for(x <- Math.max(0, ship.positionX - 1) to Math.min(boardSize-1, ship.positionX + 1)) {
-          for(y <- Math.max(0, ship.positionY - 1) to Math.min(boardSize-1, ship.positionY + ship.length)) {
-            enemyHits(x)(y) = true
+        for(x <- Math.max(0, ship.position.x - 1) to Math.min(boardSize-1, ship.position.x + 1)) {
+          for(y <- Math.max(0, ship.position.y - 1) to Math.min(boardSize-1, ship.position.y + ship.length)) {
+            newEnemyHits = newEnemyHits.addShot(Point(x, y))
           }
         }
       case Vertical =>
-        for(x <- Math.max(0, ship.positionX - 1) to Math.min(boardSize-1, ship.positionX + ship.length)) {
-          for(y <- Math.max(0, ship.positionY - 1) to Math.min(boardSize-1, ship.positionY + 1)) {
-            enemyHits(x)(y) = true
+        for(x <- Math.max(0, ship.position.x - 1) to Math.min(boardSize-1, ship.position.x + ship.length)) {
+          for(y <- Math.max(0, ship.position.y - 1) to Math.min(boardSize-1, ship.position.y + 1)) {
+            newEnemyHits = newEnemyHits.addShot(Point(x, y))
           }
         }
     }
+    Board(ships, newEnemyHits)
   }
 
-  def shipIsOnField(x: Int, y: Int): Boolean = {
-    ships.exists(p => p.isIn(x, y))
+  def shipIsOnField(point: Point): Boolean = {
+    ships.exists(p => p.isIn(point))
   }
 
   def isShipAlive(ship: Ship): Boolean = {
-    val coordinates = ship.getListOfFieldsCooridinates
-    coordinates.exists(coordinate => !enemyHits(coordinate._1)(coordinate._2))
+    val points = ship.getListOfFieldsCooridinates
+    print(points)
+    points.exists(point => enemyHits.fieldIsClear(point))
   }
 
   def isReady: Boolean = {
@@ -146,6 +130,8 @@ class Board {
 }
 
 object Board {
+  val boardSize = 10
+
   def createFieldsForBoard(boardSize: Int): Array[Array[Boolean]] = {
     val board: Array[Array[Boolean]] = Array.ofDim[Boolean](boardSize, boardSize)
     for(i <- 0 until boardSize) {
@@ -157,6 +143,7 @@ object Board {
   }
 
   def getMaximumNumberOfShips(length: Int): Int = {
+    // todo refactor this, in code should be one place with specification of this
     length match {
       case 1 => 4
       case 2 => 3
@@ -165,6 +152,8 @@ object Board {
       case _ => 0
     }
   }
+
+  def apply(): Board = new Board(List[Ship](), EnemyActions())
 }
 
 

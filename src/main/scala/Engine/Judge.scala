@@ -15,20 +15,20 @@ object Judge {
     boardPlayerWithMove.isAlive match {
       case true if boardWaitingPlayer.isAlive =>
         makeMove(playerWithMove, boardWaitingPlayer) match {
-          case Hit(x, y) =>
-            playerWithMove.shipHit(x, y)
+          case (newBoard, Hit(point)) =>
+            playerWithMove.shipHit(point)
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
-          case Sunk =>
+            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
+          case (newBoard, Sunk)=>
             playerWithMove.shipIsSunk()
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
-          case Miss =>
+            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
+          case (newBoard, Miss) =>
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
-            proceedGame(waitingPlayer, playerWithMove, boardWaitingPlayer, boardPlayerWithMove)
-          case Incorrect =>
+            proceedGame(waitingPlayer, playerWithMove, newBoard, boardPlayerWithMove)
+          case (newBoard, Incorrect) =>
             print("Incorrect")
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
+            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
         }
       case true =>
         playerWithMove.win()
@@ -39,8 +39,8 @@ object Judge {
     }
   }
 
-  def makeMove(player: Player, enemyBoard: Board): HitState = {
-    val (shotX, shotY) = player.makeShot(enemyBoard.getViewForEnemy)
-    enemyBoard.shotOn(shotX, shotY)
+  def makeMove(player: Player, enemyBoard: Board): (Board, HitState) = {
+    val position = player.makeShot(enemyBoard.getViewForEnemy)
+    enemyBoard.shotOn(position)
   }
 }
