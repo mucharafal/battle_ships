@@ -20,7 +20,7 @@ object BoardPrinter {
           case MissShot => "M"
           case SunkShip => "X"
           case AliveShip => "S"
-          case Empty => "S"
+          case Empty => " "
         }
         print(sign)
       }

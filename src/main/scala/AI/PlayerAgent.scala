@@ -9,13 +9,16 @@ class PlayerAgent extends Player {
   var state: Shooter = RandomShooter()
   var number: Int = Random.nextInt()
 
-  override def win(): Unit = {
+  override def win() {
   }
 
-  override def lost(): Unit = {
+  override def lost() {
   }
 
-  override def enemyShot(ownBoard: BoardRepresentation): Unit = {
+  override def incorrectMove() {
+  }
+
+  override def enemyShot(ownBoard: BoardRepresentation) {
   }
 
   override def generateNewBoard(): Board = {
@@ -46,7 +49,7 @@ class PlayerAgent extends Player {
     board
   }
 
-  override def shipHit(position: Point): Unit = {
+  override def shipHit(position: Point) {
     state = state match {
       case RandomShooter() => FindDirectionShooter(position)
       case FindDirectionShooter(lastAccurateShot) if lastAccurateShot.x == position.x =>
@@ -56,7 +59,7 @@ class PlayerAgent extends Player {
     }
   }
 
-  override def shipIsSunk(): Unit = {
+  override def shipIsSunk(){
     state = RandomShooter()
   }
 

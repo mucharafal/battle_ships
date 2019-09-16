@@ -116,6 +116,10 @@ class PlayerCLI extends Player {
         board
     }
   }
+
+  override def incorrectMove(): Unit = {
+    println("Incorrect move, please repeat")
+  }
 }
 
 object Action extends Enumeration {

@@ -7,12 +7,13 @@ import Engine.Direction._
 class ShipTest extends FunSuite {
 
   test("testIsIn") {
-    val ship = Ship(2, Point(0, 0), Horizontal)
+    val ship = Ship(3, Point(0, 0), Horizontal)
     val pointInside = Point(0, 0)
     assert(ship.isIn(pointInside))
-    val pointOutside = Point(0, 2)
+    val pointOutside = Point(1, 2)
     assert(!ship.isIn(pointOutside))
     assert(ship.isIn(pointInside.right))
+    assert(ship.isIn(Point(0, 2)))
   }
 
   test("testCollide") {

@@ -11,6 +11,6 @@ class FindDirectionShooterTest extends FlatSpec {
 
     val enemyBoardView = BoardRepresentation(List(field00, field01, field10, field11))
     val coordinates = FindDirectionShooter(Point(1, 0)).makeShot(enemyBoardView)
-    assert(coordinates == Point(1, 1))
+    assert(coordinates == Point(1, 1) || coordinates == Point(2, 0))
   }
 }

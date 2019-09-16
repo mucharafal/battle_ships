@@ -8,4 +8,5 @@ trait Player {
   def shipHit(point: Point): Unit
   def win()
   def lost()
+  def incorrectMove()
 }

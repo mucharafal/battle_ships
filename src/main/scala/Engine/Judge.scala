@@ -1,5 +1,7 @@
 package Engine
 
+import CLI.BoardPrinter
+
 import scala.annotation.tailrec
 
 object Judge {
@@ -17,17 +19,17 @@ object Judge {
         makeMove(playerWithMove, boardWaitingPlayer) match {
           case (newBoard, Hit(point)) =>
             playerWithMove.shipHit(point)
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
+            waitingPlayer.enemyShot(newBoard.getViewForEnemy)
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
-          case (newBoard, Sunk)=>
+          case (newBoard, Sunk) =>
             playerWithMove.shipIsSunk()
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
+            waitingPlayer.enemyShot(newBoard.getViewForEnemy)
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
           case (newBoard, Miss) =>
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
             proceedGame(waitingPlayer, playerWithMove, newBoard, boardPlayerWithMove)
           case (newBoard, Incorrect) =>
-            print("Incorrect")
+            playerWithMove.incorrectMove()
             proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
         }
       case true =>

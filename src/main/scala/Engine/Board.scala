@@ -69,11 +69,11 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
       if(enemyHits.wasShotOn(point)) {
         SunkShip
       } else {
-        MissShot
+        AliveShip
       }
     } else {
       if(enemyHits.wasShotOn(point)) {
-        AliveShip
+        MissShot
       } else {
         Empty
       }
@@ -90,7 +90,7 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
       optionShip match {
         case None => (newBoard, Miss)
         case Some(ship) =>
-          if (isShipAlive(ship)) {
+          if (newBoard.isShipAlive(ship)) {
             (newBoard, Hit(point))
           } else {
             (aroundSunkShipWithHits(ship), Sunk)
@@ -124,15 +124,11 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
 
   def isShipAlive(ship: Ship): Boolean = {
     val points = ship.getListOfFieldsCoordinates
-    print(points)
     points.exists(point => enemyHits.fieldIsClear(point))
   }
 
   def isReady: Boolean = {
-    getNumberOfShipsOnBoard(4) == 1 &&
-    getNumberOfShipsOnBoard(3) == 2 &&
-    getNumberOfShipsOnBoard(2) == 3 &&
-    getNumberOfShipsOnBoard(1) == 4 &&
+    !numberOfShipsWithGivenLength.exists(x => getNumberOfShipsOnBoard(x._1) == x._2) &&
     ships.length == 10
   }
 }
@@ -151,19 +147,14 @@ object Board {
   }
 
   def getMaximumNumberOfShips(length: Int): Int = {
-    // todo refactor this, in code should be one place with specification of this
-    length match {
-      case 1 => 4
-      case 2 => 3
-      case 3 => 2
-      case 4 => 1
-      case _ => 0
-    }
+    numberOfShipsWithGivenLength getOrElse (length, 0)
   }
 
   def apply(): Board = new Board(List[Ship](), EnemyActions())
 
   def getSize: Int = boardSize
+
+  val numberOfShipsWithGivenLength = Map(1 -> 4, 2 -> 3, 3 -> 2, 4 -> 1)
 }
 
 
