@@ -22,7 +22,7 @@ case class Ship(length: Int,
     }
   }
 
-  def getListOfFieldsCooridinates: List[Point] = {
+  def getListOfFieldsCoordinates: List[Point] = {
     (position to this.endPoint).toList
   }
 

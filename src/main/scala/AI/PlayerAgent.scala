@@ -1,7 +1,6 @@
 package AI
 
 import Engine.Direction._
-import Engine.FieldState.FieldState
 import Engine.{Direction => _, _}
 
 import scala.annotation.tailrec
@@ -16,7 +15,7 @@ class PlayerAgent extends Player {
   override def lost(): Unit = {
   }
 
-  override def enemyShot(ownBoard: Array[Array[FieldState]]): Unit = {
+  override def enemyShot(ownBoard: BoardRepresentation): Unit = {
   }
 
   override def generateNewBoard(): Board = {
@@ -28,8 +27,8 @@ class PlayerAgent extends Player {
       for(_ <- 0 until numberOfUnits) {
         var ship: Option[Ship] = None
         do {
-          val x = random.nextInt(10)
-          val y = random.nextInt(10)
+          val x = random.nextInt(Board.getSize)
+          val y = random.nextInt(Board.getSize)
           val direction = if (random.nextBoolean()) {
             Horizontal
           } else {
@@ -61,26 +60,26 @@ class PlayerAgent extends Player {
     state = RandomShooter()
   }
 
-  override def makeShot(enemyBoard: Array[Array[FieldState]]): Point = {
+  override def makeShot(enemyBoard: BoardRepresentation): Point = {
     state.makeShot(enemyBoard)
   }
 }
 
 trait Shooter {
-  def makeShot(enemyBoard: Array[Array[FieldState]]): Point
-  def canGiveShot(position: Point, enemyBoard: Array[Array[FieldState]]): Boolean = {
-      insideBoard(position, enemyBoard.length) &&
-      enemyBoard(position.x)(position.y) == FieldState.Empty
+  def makeShot(enemyBoard: BoardRepresentation): Point
+  def canGiveShot(position: Point, enemyBoard: BoardRepresentation): Boolean = {
+      insideBoard(position) &&
+      enemyBoard.getStateOf(position) == FieldState.Empty
   }
-  def insideBoard(position: Point, boardSize: Int): Boolean = {
-    val inside = (p: Int) => p >= 0 && p < boardSize
+  def insideBoard(position: Point): Boolean = {
+    val inside = (p: Int) => p >= 0 && p < Board.getSize
     inside(position.x) && inside(position.y)
   }
 }
 
 case class RandomShooter() extends Shooter {
-  @tailrec override final def makeShot(enemyBoard: Array[Array[FieldState]]): Point = {
-    val position = Point(Random.nextInt(enemyBoard.length), Random.nextInt(enemyBoard.length))
+  @tailrec override final def makeShot(enemyBoard: BoardRepresentation): Point = {
+    val position = Point(Random.nextInt(Board.getSize), Random.nextInt(Board.getSize))
     if(canGiveShot(position, enemyBoard)) {
       position
     } else {
@@ -90,7 +89,7 @@ case class RandomShooter() extends Shooter {
 }
 
 case class FindDirectionShooter(lastAccurateShot: Point) extends Shooter {
-  override def makeShot(enemyBoard: Array[Array[FieldState]]): Point = {
+  override def makeShot(enemyBoard: BoardRepresentation): Point = {
     val positions = Random.shuffle(
       List(lastAccurateShot.up,
       lastAccurateShot.down,
@@ -107,7 +106,7 @@ case class FindDirectionShooter(lastAccurateShot: Point) extends Shooter {
 }
 
 case class FinishInDirectionShooter(lastAccurateShot: Point, direction: Direction) extends Shooter {
-  override def makeShot(enemyBoard: Array[Array[FieldState]]): Point = {
+  override def makeShot(enemyBoard: BoardRepresentation): Point = {
     direction match {
       case Horizontal =>
         maxPositionOnLeft(enemyBoard, lastAccurateShot) match {
@@ -122,30 +121,30 @@ case class FinishInDirectionShooter(lastAccurateShot: Point, direction: Directio
     }
   }
 
-  def maxPositionDown(enemyBoard: Array[Array[FieldState]], beginPoint: Point): Option[Point] = {
+  def maxPositionDown(enemyBoard: BoardRepresentation, beginPoint: Point): Option[Point] = {
     val stepDown = (x: Point) => x.down
     maxPositionInDirection(enemyBoard, beginPoint, stepDown)
   }
 
-  def maxPositionUp(enemyBoard: Array[Array[FieldState]], beginPoint: Point): Option[Point] = {
+  def maxPositionUp(enemyBoard: BoardRepresentation, beginPoint: Point): Option[Point] = {
     val stepUp = (x: Point) => x.up
     maxPositionInDirection(enemyBoard, beginPoint, stepUp)
   }
 
-  def maxPositionOnLeft(enemyBoard: Array[Array[FieldState]], beginPoint: Point): Option[Point] = {
+  def maxPositionOnLeft(enemyBoard: BoardRepresentation, beginPoint: Point): Option[Point] = {
     val stepLeft = (x: Point) => x.left
     maxPositionInDirection(enemyBoard, beginPoint, stepLeft)
   }
 
-  def maxPositionOnRight(enemyBoard: Array[Array[FieldState]], beginPoint: Point): Option[Point] = {
+  def maxPositionOnRight(enemyBoard: BoardRepresentation, beginPoint: Point): Option[Point] = {
     val stepRight = (x: Point) => x.right
     maxPositionInDirection(enemyBoard, beginPoint, stepRight)
   }
 
-  def maxPositionInDirection(enemyBoard: Array[Array[FieldState]], beginPosition: Point,
+  def maxPositionInDirection(enemyBoard: BoardRepresentation, beginPosition: Point,
                              nextStep: Point => Point): Option[Point] = {
     var nextPosition = nextStep(beginPosition)
-    while(insideBoard(nextPosition, enemyBoard.length) && enemyBoard(nextPosition.x)(nextPosition.y) == FieldState.SunkShip) {
+    while(insideBoard(nextPosition) && enemyBoard.getStateOf(nextPosition) == FieldState.SunkShip) {
       nextPosition = nextStep(nextPosition)
     }
     if(canGiveShot(nextPosition, enemyBoard)) {

@@ -21,11 +21,11 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
   def isNotTooCloseToOthers(ship: Ship): Boolean = {
     val beginPoint = ship.position.left.up
     val endPoint = ship.endPoint.right.down
-    !(beginPoint to endPoint).exists(shipIsOnField(_))
+    !(beginPoint to endPoint).exists(shipIsOnField)
   }
 
   def isAlive: Boolean = {
-    getViewForOwner.exists(row => row.contains(AliveShip))
+    ships.exists(ship => isShipAlive(ship))
   }
 
   def deleteShip(ship: Ship): Board ={
@@ -50,26 +50,34 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
     insideBoard(ship.position) && insideBoard(ship.endPoint)
   }
 
-  def getViewForEnemy: Array[Array[FieldState]] = {
-    getViewForOwner.map(x => x.map{
-      case AliveShip => Empty
-      case anyOther => anyOther
-    })
+  def getViewForEnemy: BoardRepresentation = {
+    getViewForOwner.getViewForEnemy
   }
 
-  def getViewForOwner: Array[Array[FieldState]] = {
-    val ownerView: Array[Array[FieldState]] = Array.ofDim[FieldState](boardSize, boardSize)
-    for(i <- 0 until boardSize) {
-      for(j <- 0 until boardSize) {
-        ownerView(i)(j) = enemyHits.wasShotOn(Point(i, j)) match {
-          case true if shipIsOnField(Point(i, j)) => SunkShip
-          case true => MissShot
-          case false if shipIsOnField(Point(i, j)) => AliveShip
-          case false => Empty
-        }
+  def getViewForOwner: BoardRepresentation = {
+    val fields =
+      for(point <- Point(0, 0) until Point(boardSize, boardSize)
+          if getFieldState(point) != Empty)
+        yield {
+          Field(point, getFieldState(point))
+      }
+    BoardRepresentation(fields.toList)
+  }
+
+  def getFieldState(point: Point): FieldState = {
+    if(shipIsOnField(point)) {
+      if(enemyHits.wasShotOn(point)) {
+        SunkShip
+      } else {
+        MissShot
+      }
+    } else {
+      if(enemyHits.wasShotOn(point)) {
+        AliveShip
+      } else {
+        Empty
       }
     }
-    ownerView
   }
 
   def shotOn(point: Point): (Board, HitState) = {
@@ -115,7 +123,7 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
   }
 
   def isShipAlive(ship: Ship): Boolean = {
-    val points = ship.getListOfFieldsCooridinates
+    val points = ship.getListOfFieldsCoordinates
     print(points)
     points.exists(point => enemyHits.fieldIsClear(point))
   }
@@ -154,6 +162,8 @@ object Board {
   }
 
   def apply(): Board = new Board(List[Ship](), EnemyActions())
+
+  def getSize: Int = boardSize
 }
 
 

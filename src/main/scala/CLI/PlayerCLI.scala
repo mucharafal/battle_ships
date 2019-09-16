@@ -2,7 +2,6 @@ package CLI
 
 import CLI.Action.Action
 import Engine.Direction.Direction
-import Engine.FieldState.FieldState
 import Engine._
 
 import scala.io.StdIn
@@ -15,7 +14,7 @@ class PlayerCLI extends Player {
     println("You have won!")
   }
 
-  override def makeShot(enemyBoard: Array[Array[FieldState]]): Point = {
+  override def makeShot(enemyBoard: BoardRepresentation): Point = {
     BoardPrinter.printBoard(enemyBoard)
     println("Type coordinates of your shot: ")
     val x = StdIn.readInt()
@@ -23,7 +22,7 @@ class PlayerCLI extends Player {
     Point(x, y)
   }
 
-  override def enemyShot(ownBoard: Array[Array[FieldState]]): Unit = {
+  override def enemyShot(ownBoard: BoardRepresentation): Unit = {
     println("Enemy shot...")
     BoardPrinter.printBoard(ownBoard)
   }
@@ -48,10 +47,9 @@ class PlayerCLI extends Player {
       board = askForAction() match {
         case Action.AddShip => addShip(board)
         case Action.RemoveShip => removeShip(board)
-        case _ => {
+        case _ =>
           println("Unknown action")
           board
-        }
       }
     }
     board

@@ -38,4 +38,10 @@ case class Point(x: Int, y: Int) {
          j <- y to otherPoint.y)
       yield Point(i, j)
   }
+
+  def until(otherPoint: Point): IndexedSeq[Point] = {
+    for(i <- x until otherPoint.x;
+        j <- y until otherPoint.y)
+      yield Point(i, j)
+  }
 }
