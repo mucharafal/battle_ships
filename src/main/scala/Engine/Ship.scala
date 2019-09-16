@@ -1,5 +1,7 @@
 package Engine
 
+import java.util.Random
+
 import Engine.Direction.{Direction, Horizontal, Vertical}
 
 case class Ship(length: Int,
@@ -31,4 +33,18 @@ case class Ship(length: Int,
     case Horizontal => position.right(length-1)
   }
 
+}
+
+object Ship {
+  def generate(length: Int): Ship = {
+    val random = new Random()
+    val x = random.nextInt(Board.getSize)
+    val y = random.nextInt(Board.getSize)
+    val direction = if (random.nextBoolean()) {
+      Horizontal
+    } else {
+      Vertical
+    }
+    Ship(length, Point(x, y),direction)
+  }
 }

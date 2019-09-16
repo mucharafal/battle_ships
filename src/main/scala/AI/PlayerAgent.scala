@@ -24,22 +24,12 @@ class PlayerAgent extends Player {
   override def generateNewBoard(): Board = {
     var board = Board()
     var wasAdded = false
-    val random = new Random()
     for(length <- 1 to 4) {
       val numberOfUnits = Board.getMaximumNumberOfShips(length)
       for(_ <- 0 until numberOfUnits) {
-        var ship: Option[Ship] = None
         do {
-          val x = random.nextInt(Board.getSize)
-          val y = random.nextInt(Board.getSize)
-          val direction = if (random.nextBoolean()) {
-            Horizontal
-          } else {
-            Vertical
-          }
-          // todo refactor generating points
-          ship = Some(Ship(length, Point(x, y),direction))
-          val newBoardAndResult = board.addShip(ship.get)
+          val ship = Ship.generate(length)
+          val newBoardAndResult = board.addShip(ship)
           board = newBoardAndResult._1
           wasAdded = newBoardAndResult._2
         }
