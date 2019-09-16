@@ -16,12 +16,7 @@ case class Ship(length: Int,
   }
 
   def isIn(point: Point): Boolean = {
-    direction match {
-      case Vertical =>
-        point.isOnVerticalLineBetween(position, position.down(length-1))
-      case Horizontal =>
-        point.isOnHorizontalLineBetween(position, position.right(length-1))
-    }
+    point.isOnLineBetween(position, this.endPoint)
   }
 
   def getListOfFieldsCoordinates: List[Point] = {

@@ -25,12 +25,8 @@ case class Point(x: Int, y: Int) {
 
   def up: Point = Point(x - 1, y)
 
-  def isOnHorizontalLineBetween(begin: Point, end: Point): Boolean = {
-    (begin.y to end.y).exists(newY => Point(begin.x, newY) == this)
-  }
-
-  def isOnVerticalLineBetween(begin: Point, end: Point): Boolean = {
-    (begin.x to end.x).exists(newX => Point(newX, begin.y) == this)
+  def isOnLineBetween(begin: Point, end: Point): Boolean = {
+    (begin to end).contains(this)
   }
 
   def to(otherPoint: Point): IndexedSeq[Point] = {
