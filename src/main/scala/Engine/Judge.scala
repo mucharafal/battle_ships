@@ -1,7 +1,5 @@
 package Engine
 
-import CLI.BoardPrinter
-
 import scala.annotation.tailrec
 
 object Judge {

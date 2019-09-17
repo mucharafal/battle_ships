@@ -35,11 +35,15 @@ class ShipTest extends FunSuite {
   }
 
   test("testGetListOfFieldsCooridinates") {
-
+    val ship = Ship(3, Point(7, 7), Horizontal)
+    val coordinates = List(Point(7, 7), Point(7, 8), Point(7, 9))
+    assert(ship.getListOfFieldsCoordinates == coordinates)
   }
 
   test("testEndPoint") {
-
+    val ship = Ship(3, Point(7, 7), Horizontal)
+    val endPoint = Point(7, 9)
+    assert(endPoint == ship.endPoint)
   }
 
 }
