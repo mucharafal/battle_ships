@@ -1,6 +1,6 @@
-package Engine
+package AI
 
-import AI.RandomShooter
+import Engine._
 import org.scalatest.FlatSpec
 
 class RandomShooterTest extends FlatSpec {
