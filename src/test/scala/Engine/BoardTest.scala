@@ -133,13 +133,13 @@ class BoardTest extends FunSuite {
 
   test("testIsInBoard") {
     val ship = Ship(2, Point(9, 9), Horizontal)
-    assert(!Board.isInBoard(ship))
+    assert(!Board.isInsideBoard(ship))
 
     val ship1 = Ship(2, Point(9, 9), Vertical)
-    assert(!Board.isInBoard(ship1))
+    assert(!Board.isInsideBoard(ship1))
 
     val ship2 = Ship(1, Point(9, 9), Vertical)
-    assert(Board.isInBoard(ship2))
+    assert(Board.isInsideBoard(ship2))
   }
 
   test("testIsNotTooCloseToOthers") {
@@ -182,5 +182,19 @@ class BoardTest extends FunSuite {
     val fullBoard = Board(List(Ship(4, Point(0, 0), Horizontal)), EnemyActions())
     assert(fullBoard.getNumberOfShipsOnBoard(4) == 1)
     assert(fullBoard.getNumberOfShipsOnBoard(3) == 0)
+  }
+
+  test("testAroundSunkShipWithHits") {
+    val board = Board(List(), EnemyActions())
+    val newBoard = board.aroundSunkShipWithHits(Ship(1, Point(0, 0), Horizontal))
+    assert(!newBoard.enemyHits.wasShotOn(Point(-1, -1)))
+    assert(!newBoard.enemyHits.wasShotOn(Point(-1, 0)))
+    assert(!newBoard.enemyHits.wasShotOn(Point(0, -1)))
+    assert(!newBoard.enemyHits.wasShotOn(Point(1, -1)))
+    assert(!newBoard.enemyHits.wasShotOn(Point(-1, 1)))
+    assert(newBoard.enemyHits.wasShotOn(Point(1, 1)))
+    assert(newBoard.enemyHits.wasShotOn(Point(0, 1)))
+    assert(newBoard.enemyHits.wasShotOn(Point(0, 0)))
+    assert(newBoard.enemyHits.wasShotOn(Point(1, 0)))
   }
 }

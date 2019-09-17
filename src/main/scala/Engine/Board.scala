@@ -9,7 +9,7 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
   def addShip(ship: Ship): (Board, Boolean) = {
     if(
       canShipWithGivenLengthBeAdded(ship.length) &&
-      isInBoard(ship) &&
+      isInsideBoard(ship) &&
       isNotTooCloseToOthers(ship)
     ) {
       (Board(ship :: ships, enemyHits), true)
@@ -95,20 +95,9 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
 
   def aroundSunkShipWithHits(ship: Ship): Board = {
     var newEnemyHits = enemyHits
-    ship.direction match {
-      case Horizontal =>
-        for(x <- Math.max(0, ship.position.x - 1) to Math.min(boardSize-1, ship.position.x + 1)) {
-          for(y <- Math.max(0, ship.position.y - 1) to Math.min(boardSize-1, ship.position.y + ship.length)) {
-            newEnemyHits = newEnemyHits.addShot(Point(x, y))
-          }
-        }
-      case Vertical =>
-        for(x <- Math.max(0, ship.position.x - 1) to Math.min(boardSize-1, ship.position.x + ship.length)) {
-          for(y <- Math.max(0, ship.position.y - 1) to Math.min(boardSize-1, ship.position.y + 1)) {
-            newEnemyHits = newEnemyHits.addShot(Point(x, y))
-          }
-        }
-    }
+    val leftUpperCorner = ship.position.left.up
+    val rightDownCorner = ship.endPoint.right.down
+    (leftUpperCorner to rightDownCorner).foreach(point => if(isInsideBoard(point)) {newEnemyHits = newEnemyHits.addShot(point)})
     Board(ships, newEnemyHits)
   }
 
@@ -129,6 +118,7 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
 
 object Board {
   val boardSize = 10
+  val numberOfShipsWithGivenLength = Map(1 -> 4, 2 -> 3, 3 -> 2, 4 -> 1)
 
   def createFieldsForBoard(boardSize: Int): Array[Array[Boolean]] = {
     val board: Array[Array[Boolean]] = Array.ofDim[Boolean](boardSize, boardSize)
@@ -148,12 +138,14 @@ object Board {
 
   def getSize: Int = boardSize
 
-  val numberOfShipsWithGivenLength = Map(1 -> 4, 2 -> 3, 3 -> 2, 4 -> 1)
+  def isInsideBoard(ship: Ship): Boolean = {
+    isInsideBoard(ship.position) && isInsideBoard(ship.endPoint)
+  }
 
-  def isInBoard(ship: Ship): Boolean = {
+  def isInsideBoard(point: Point): Boolean = {
     val insideAxis = (coordinate: Int) => coordinate >= 0 && coordinate < boardSize
     val insideBoard = (p: Point) => insideAxis(p.x) && insideAxis(p.y)
-    insideBoard(ship.position) && insideBoard(ship.endPoint)
+    insideBoard(point)
   }
 }
 
