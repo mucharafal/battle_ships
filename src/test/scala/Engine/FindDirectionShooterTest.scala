@@ -1,5 +1,6 @@
+package Engine
+
 import AI.FindDirectionShooter
-import Engine.{BoardRepresentation, Field, FieldState, Point}
 import org.scalatest.FlatSpec
 
 class FindDirectionShooterTest extends FlatSpec {

@@ -44,12 +44,6 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
     ships.count(_.length == length)
   }
 
-  def isInBoard(ship: Ship): Boolean = {
-    val insideAxis = (coordinate: Int) => coordinate >= 0 && coordinate < boardSize
-    val insideBoard = (p: Point) => insideAxis(p.x) && insideAxis(p.y)
-    insideBoard(ship.position) && insideBoard(ship.endPoint)
-  }
-
   def getViewForEnemy: BoardRepresentation = {
     getViewForOwner.getViewForEnemy
   }
@@ -155,6 +149,12 @@ object Board {
   def getSize: Int = boardSize
 
   val numberOfShipsWithGivenLength = Map(1 -> 4, 2 -> 3, 3 -> 2, 4 -> 1)
+
+  def isInBoard(ship: Ship): Boolean = {
+    val insideAxis = (coordinate: Int) => coordinate >= 0 && coordinate < boardSize
+    val insideBoard = (p: Point) => insideAxis(p.x) && insideAxis(p.y)
+    insideBoard(ship.position) && insideBoard(ship.endPoint)
+  }
 }
 
 

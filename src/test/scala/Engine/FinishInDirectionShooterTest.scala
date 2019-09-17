@@ -1,6 +1,7 @@
-import AI.{FindDirectionShooter, FinishInDirectionShooter}
-import Engine._
-import org.scalatest.{FlatSpec, FunSuite}
+package Engine
+
+import AI.FinishInDirectionShooter
+import org.scalatest.FlatSpec
 
 class FinishInDirectionShooterTest extends FlatSpec {
 
