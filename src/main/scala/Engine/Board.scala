@@ -121,16 +121,6 @@ object Board {
   val boardSize = 10
   val numberOfShipsWithGivenLength = Map(1 -> 4, 2 -> 3, 3 -> 2, 4 -> 1)
 
-  def createFieldsForBoard(boardSize: Int): Array[Array[Boolean]] = {
-    val board: Array[Array[Boolean]] = Array.ofDim[Boolean](boardSize, boardSize)
-    for(i <- 0 until boardSize) {
-      for(j <- 0 until boardSize) {
-        board(i)(j) = false
-      }
-    }
-    board
-  }
-
   def getMaximumNumberOfShips(length: Int): Int = {
     numberOfShipsWithGivenLength getOrElse (length, 0)
   }
