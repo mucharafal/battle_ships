@@ -75,7 +75,8 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
   }
 
   def shotOn(point: Point): (Board, HitState) = {
-    if(enemyHits.wasShotOn(point)) {
+    if(enemyHits.wasShotOn(point) ||
+      !isInsideBoard(point)) {
       (this, Incorrect)
     } else {
       val newEnemyHits = enemyHits.addShot(point)

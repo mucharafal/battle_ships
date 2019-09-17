@@ -115,6 +115,10 @@ class BoardTest extends FunSuite {
     assert(deadState == Sunk)
     assert(boardWithDeadShip.enemyHits.wasShotOn(Point(2, 3)))
     assert(boardWithDeadShip.enemyHits.wasShotOn(Point(2, 4)))
+
+    val (anotherBoard1, newHitState1) = newBoard.shotOn(Point(100, 3))
+    assert(newHitState1 == Incorrect)
+    assert(anotherBoard1.enemyHits.enemyActions.length == 1)
   }
 
   test("testGetFieldState") {
