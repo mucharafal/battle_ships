@@ -5,9 +5,7 @@ import Engine.{Direction => _, _}
 
 import scala.annotation.tailrec
 import scala.util.Random
-class PlayerAgent extends Player {
-  var state: Shooter = RandomShooter()
-  var number: Int = Random.nextInt()
+case class PlayerAgent(state: Shooter, number: Int) extends Player {
 
   override def win() {
   }
@@ -22,40 +20,45 @@ class PlayerAgent extends Player {
   }
 
   override def generateNewBoard(): Board = {
-    var board = Board()
-    var wasAdded = false
-    for(length <- 1 to 4) {
-      val numberOfUnits = Board.getMaximumNumberOfShips(length)
-      for(_ <- 0 until numberOfUnits) {
-        do {
-          val ship = Ship.generate(length)
-          val newBoardAndResult = board.addShip(ship)
-          board = newBoardAndResult._1
-          wasAdded = newBoardAndResult._2
-        }
-        while(!wasAdded)
+    lazy val addShipWithLength: (Int, Board) => Board = (length: Int, board: Board) => {
+      val ship = Ship.generate(length)
+      val (newBoard, ifAdded) = board.addShip(ship)
+      if(ifAdded) {
+        newBoard
+      } else {
+        addShipWithLength(length, board)
       }
     }
-    board
+    val addShipsWithLength = (length: Int, board: Board) => {
+      val numberOfShips = Board.getMaximumNumberOfShips(length)
+      (1 to numberOfShips).foldLeft(board)((board, _) => addShipWithLength(length, board))
+    }
+    Board.getLengthsOfShips.foldLeft(Board())((board: Board, length: Int) => addShipsWithLength(length, board))
   }
 
-  override def shipHit(position: Point) {
-    state = state match {
+  override def shipHit(position: Point): PlayerAgent = {
+    val newState = state match {
       case RandomShooter() => FindDirectionShooter(position)
       case FindDirectionShooter(lastAccurateShot) if lastAccurateShot.x == position.x =>
         FinishInDirectionShooter(position, Horizontal)
       case FindDirectionShooter(_) => FinishInDirectionShooter(position, Vertical)
       case x: FinishInDirectionShooter => x
     }
+    PlayerAgent(newState, number)
   }
 
-  override def shipIsSunk(){
-    state = RandomShooter()
+  override def shipIsSunk(): PlayerAgent = {
+    PlayerAgent(RandomShooter(), number)
   }
 
   override def makeShot(enemyBoard: BoardRepresentation): Point = {
     state.makeShot(enemyBoard)
   }
+}
+
+object PlayerAgent {
+  def apply(state: Shooter): PlayerAgent = new PlayerAgent(state, new Random().nextInt())
+  def apply(): PlayerAgent = new PlayerAgent(RandomShooter(), new Random().nextInt())
 }
 
 trait Shooter {
@@ -136,10 +139,15 @@ case class FinishInDirectionShooter(lastAccurateShot: Point, direction: Directio
 
   def maxPositionInDirection(enemyBoard: BoardRepresentation, beginPosition: Point,
                              nextStep: Point => Point): Option[Point] = {
-    var nextPosition = nextStep(beginPosition)
-    while(insideBoard(nextPosition) && enemyBoard.getStateOf(nextPosition) == FieldState.SunkShip) {
-      nextPosition = nextStep(nextPosition)
+    lazy val maximumPositionInDirection: Point => Point = (position: Point) => {
+      val nextPosition = nextStep(position)
+      if(insideBoard(nextPosition) && enemyBoard.getStateOf(position) == FieldState.SunkShip) {
+        maximumPositionInDirection(nextPosition)
+      } else {
+        position
+      }
     }
+    val nextPosition = maximumPositionInDirection(beginPosition)
     if(canGiveShot(nextPosition, enemyBoard)) {
       Some(nextPosition)
     } else {

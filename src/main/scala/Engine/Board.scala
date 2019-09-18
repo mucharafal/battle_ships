@@ -95,10 +95,15 @@ case class Board(ships: List[Ship], enemyHits: EnemyActions) {
   }
 
   def aroundSunkShipWithHits(ship: Ship): Board = {
-    var newEnemyHits = enemyHits
     val leftUpperCorner = ship.position.left.up
     val rightDownCorner = ship.endPoint.right.down
-    (leftUpperCorner to rightDownCorner).foreach(point => if(isInsideBoard(point)) {newEnemyHits = newEnemyHits.addShot(point)})
+    val newEnemyHits = (leftUpperCorner to rightDownCorner).foldLeft(enemyHits)((newEnemyHits, position) => {
+      if(isInsideBoard(position)) {
+        newEnemyHits.addShot(position)
+      } else {
+        newEnemyHits
+      }
+    })
     Board(ships, newEnemyHits)
   }
 
@@ -138,6 +143,8 @@ object Board {
     val insideBoard = (p: Point) => insideAxis(p.x) && insideAxis(p.y)
     insideBoard(point)
   }
+
+  def getLengthsOfShips: Iterable[Int] = numberOfShipsWithGivenLength.keys
 }
 
 

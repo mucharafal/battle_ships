@@ -27,24 +27,25 @@ class PlayerCLI extends Player {
     BoardPrinter.printBoard(ownBoard)
   }
 
-  override def shipIsSunk(): Unit = {
+  override def shipIsSunk(): PlayerCLI = {
     println("You sunk enemy ship!")
+    this
   }
 
-  override def shipHit(point: Point): Unit = {
+  override def shipHit(point: Point): PlayerCLI = {
     println("You have shot in enemy ship!")
+    this
   }
 
   override def generateNewBoard(): Board = {
-    var board: Board = Board()
-    while(true) {
+    val generateNewBoard = (board: Board) => {
       if(board.isReady) {
         if(askFor("Board is ready. Would like to start game?")) {
           return board
         }
       }
       BoardPrinter.printBoard(board.getViewForOwner)
-      board = askForAction() match {
+      askForAction() match {
         case Action.AddShip => addShip(board)
         case Action.RemoveShip => removeShip(board)
         case _ =>
@@ -52,8 +53,9 @@ class PlayerCLI extends Player {
           board
       }
     }
-    board
+    generateNewBoard(Board())
   }
+
   def askFor(question: String): Boolean = {
     println(question + " Answer: y/n")
     val answer = StdIn.readChar()

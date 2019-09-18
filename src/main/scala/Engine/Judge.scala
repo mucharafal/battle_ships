@@ -16,13 +16,13 @@ object Judge {
       case true if boardWaitingPlayer.isAlive =>
         makeMove(playerWithMove, boardWaitingPlayer) match {
           case (newBoard, Hit(point)) =>
-            playerWithMove.shipHit(point)
+            val newStateOfPlayer = playerWithMove.shipHit(point)
             waitingPlayer.enemyShot(newBoard.getViewForEnemy)
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
+            proceedGame(newStateOfPlayer, waitingPlayer, boardPlayerWithMove, newBoard)
           case (newBoard, Sunk) =>
-            playerWithMove.shipIsSunk()
+            val newStateOfPlayer = playerWithMove.shipIsSunk()
             waitingPlayer.enemyShot(newBoard.getViewForEnemy)
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
+            proceedGame(newStateOfPlayer, waitingPlayer, boardPlayerWithMove, newBoard)
           case (newBoard, Miss) =>
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
             proceedGame(waitingPlayer, playerWithMove, newBoard, boardPlayerWithMove)
