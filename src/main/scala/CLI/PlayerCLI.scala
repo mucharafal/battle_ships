@@ -2,43 +2,43 @@ package CLI
 
 import CLI.Action.Action
 import Engine.Direction.Direction
-import Engine.FieldState.FieldState
-import Engine.{Board, Direction, Player, Ship}
+import Engine._
 
 import scala.io.StdIn
 class PlayerCLI extends Player {
-  override def endGame(win: Boolean): Unit = {
-    if(win) {
-      println("You have won!")
-    } else {
-      println("You have lost...")
-    }
+  override def lost(): Unit = {
+    println("You have lost...")
   }
 
-  override def makeShot(enemyBoard: Array[Array[FieldState]]): (Int, Int) = {
+  override def win(): Unit = {
+    println("You have won!")
+  }
+
+  override def makeShot(enemyBoard: BoardRepresentation): Point = {
     BoardPrinter.printBoard(enemyBoard)
     println("Type coordinates of your shot: ")
     val x = StdIn.readInt()
     val y = StdIn.readInt()
-    (x, y)
+    Point(x, y)
   }
 
-  override def enemyShot(ownBoard: Array[Array[FieldState]]): Unit = {
+  override def enemyShot(ownBoard: BoardRepresentation): Unit = {
     println("Enemy shot...")
     BoardPrinter.printBoard(ownBoard)
   }
 
-  override def shipIsSunk(): Unit = {
+  override def shipIsSunk(): PlayerCLI = {
     println("You sunk enemy ship!")
+    this
   }
 
-  override def shipHit(positionX: Int, positionY: Int): Unit = {
+  override def shipHit(point: Point): PlayerCLI = {
     println("You have shot in enemy ship!")
+    this
   }
 
   override def generateNewBoard(): Board = {
-    val board: Board = new Board()
-    while(true) {
+    val generateNewBoard = (board: Board) => {
       if(board.isReady) {
         if(askFor("Board is ready. Would like to start game?")) {
           return board
@@ -48,11 +48,14 @@ class PlayerCLI extends Player {
       askForAction() match {
         case Action.AddShip => addShip(board)
         case Action.RemoveShip => removeShip(board)
-        case _ => println("Unknown action")
+        case _ =>
+          println("Unknown action")
+          board
       }
     }
-    board
+    generateNewBoard(Board())
   }
+
   def askFor(question: String): Boolean = {
     println(question + " Answer: y/n")
     val answer = StdIn.readChar()
@@ -71,9 +74,9 @@ class PlayerCLI extends Player {
     }
   }
 
-  def askForCoordinates: (Int, Int) = {
+  def askForCoordinates: Point = {
     println("Type coordinates: ")
-    (StdIn.readInt(), StdIn.readInt())
+    Point(StdIn.readInt(), StdIn.readInt())
   }
 
   def askForDirection: Direction = {
@@ -90,27 +93,34 @@ class PlayerCLI extends Player {
     StdIn.readInt()
   }
 
-  def addShip(board: Board) {
+  def addShip(board: Board): Board = {
     val coordinates = askForCoordinates
     val direction = askForDirection
     val length = askForLength
 
-    val ship = Ship(length, coordinates._1, coordinates._2, direction)
-    if(board.addShip(ship)) {
+    val ship = Ship(length, coordinates, direction)
+    val newBoardAndResult = board.addShip(ship)
+    if(newBoardAndResult._2) {
       println("Ship added successfully")
     } else {
       println("Cannot add ship")
     }
+    newBoardAndResult._1
   }
 
-  def removeShip(board: Board) {
+  def removeShip(board: Board): Board = {
     val coordinates = askForCoordinates
 
-    val optionShip = board.ships.find(_.isIn(coordinates._1, coordinates._2))
+    val optionShip = board.ships.find(_.isIn(coordinates))
     optionShip match {
       case Some(ship) => board.deleteShip(ship)
       case None => println("Coordinates are incorrect")
+        board
     }
+  }
+
+  override def incorrectMove(): Unit = {
+    println("Incorrect move, please repeat")
   }
 }
 

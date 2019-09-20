@@ -1,37 +1,45 @@
 package Engine
 
+import java.util.Random
+
 import Engine.Direction.{Direction, Horizontal, Vertical}
 
 case class Ship(length: Int,
-                positionX: Int, positionY: Int, direction: Direction) {
+                position: Point, direction: Direction) {
   def collide(other: Ship): Boolean= {
     direction match {
       case Vertical =>
-        (0 until length).exists(x => {other.isIn(x + positionX, positionY)})
+        (0 until length).exists(x => {other.isIn(position.down(x))})
       case Horizontal =>
-        (0 until length).exists(x => {other.isIn(positionX, positionY + x)})
+        (0 until length).exists(x => {other.isIn(position.right(x))})
     }
   }
 
-  def isIn(pointX: Int, pointY: Int): Boolean = {
-    direction match {
-      case Vertical =>
-        positionY == pointY && positionX <= pointX && positionX + length > pointX
-      case Horizontal =>
-        positionX == pointX && positionY <= pointY && positionY + length > pointY
-    }
+  def isIn(point: Point): Boolean = {
+    point.isOnLineBetween(position, this.endPoint)
   }
 
-  def getListOfFieldsCooridinates: List[(Int, Int)] = {
-    var coordinates: List[(Int, Int)] = List()
-    for(i <- 0 until length) {
-      direction match {
-        case Vertical => coordinates = (positionX + i, positionY) :: coordinates
-        case Horizontal => coordinates = (positionX, positionY + i) :: coordinates
-      }
-    }
-    coordinates
+  def getListOfFieldsCoordinates: List[Point] = {
+    (position to this.endPoint).toList
   }
 
+  def endPoint: Point = direction match {
+    case Vertical => position.down(length-1)
+    case Horizontal => position.right(length-1)
+  }
 
+}
+
+object Ship {
+  def generate(length: Int): Ship = {
+    val random = new Random()
+    val x = random.nextInt(Board.getSize)
+    val y = random.nextInt(Board.getSize)
+    val direction = if (random.nextBoolean()) {
+      Horizontal
+    } else {
+      Vertical
+    }
+    Ship(length, Point(x, y),direction)
+  }
 }

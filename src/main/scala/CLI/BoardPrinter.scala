@@ -1,10 +1,11 @@
 package CLI
 
-import Engine.FieldState.{AliveShip, Empty, FieldState, MissShot, SunkShip}
+import Engine.{Board, BoardRepresentation, Field, Point}
+import Engine.FieldState.{AliveShip, Empty, MissShot, SunkShip}
 
 object BoardPrinter {
-  def printBoard(board: Array[Array[FieldState]]) {
-    val boardSize = board.length
+  def printBoard(board: BoardRepresentation) {
+    val boardSize = Board.getSize
     print(" Y")
     (0 until boardSize).foreach(print(_))
     println()
@@ -15,11 +16,11 @@ object BoardPrinter {
     for(x <- 0 until boardSize) {
       print(x + "|")
       for(y <- 0 until boardSize) {
-        val sign = board(x)(y) match {
-          case Empty => " "
+        val sign = board.getStateOf(Point(x, y)) match {
           case MissShot => "M"
           case SunkShip => "X"
           case AliveShip => "S"
+          case Empty => " "
         }
         print(sign)
       }

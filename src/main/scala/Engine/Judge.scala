@@ -2,8 +2,8 @@ package Engine
 
 import scala.annotation.tailrec
 
-class Judge(player1: Player, player2: Player) {
-  def processGame(): Unit = {
+object Judge {
+  def startGame(player1: Player, player2: Player): Unit = {
     val boardPlayer1 = player1.generateNewBoard()
     val boardPlayer2 = player2.generateNewBoard()
 
@@ -15,32 +15,32 @@ class Judge(player1: Player, player2: Player) {
     boardPlayerWithMove.isAlive match {
       case true if boardWaitingPlayer.isAlive =>
         makeMove(playerWithMove, boardWaitingPlayer) match {
-          case Hit(x, y) =>
-            playerWithMove.shipHit(x, y)
+          case (newBoard, Hit(point)) =>
+            val newStateOfPlayer = playerWithMove.shipHit(point)
+            waitingPlayer.enemyShot(newBoard.getViewForEnemy)
+            proceedGame(newStateOfPlayer, waitingPlayer, boardPlayerWithMove, newBoard)
+          case (newBoard, Sunk) =>
+            val newStateOfPlayer = playerWithMove.shipIsSunk()
+            waitingPlayer.enemyShot(newBoard.getViewForEnemy)
+            proceedGame(newStateOfPlayer, waitingPlayer, boardPlayerWithMove, newBoard)
+          case (newBoard, Miss) =>
             waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
-          case Sunk =>
-            playerWithMove.shipIsSunk()
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
-          case Miss =>
-            waitingPlayer.enemyShot(boardWaitingPlayer.getViewForEnemy)
-            proceedGame(waitingPlayer, playerWithMove, boardWaitingPlayer, boardPlayerWithMove)
-          case Incorrect =>
-            print("Incorrect")
-            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, boardWaitingPlayer)
+            proceedGame(waitingPlayer, playerWithMove, newBoard, boardPlayerWithMove)
+          case (newBoard, Incorrect) =>
+            playerWithMove.incorrectMove()
+            proceedGame(playerWithMove, waitingPlayer, boardPlayerWithMove, newBoard)
         }
       case true =>
-        playerWithMove.endGame(true)
-        waitingPlayer.endGame(false)
+        playerWithMove.win()
+        waitingPlayer.lost()
       case false =>
-        playerWithMove.endGame(false)
-        waitingPlayer.endGame(true)
+        playerWithMove.lost()
+        waitingPlayer.win()
     }
   }
 
-  def makeMove(player: Player, enemyBoard: Board): HitState = {
-    val (shotX, shotY) = player.makeShot(enemyBoard.getViewForEnemy)
-    enemyBoard.shotOn(shotX, shotY)
+  def makeMove(player: Player, enemyBoard: Board): (Board, HitState) = {
+    val position = player.makeShot(enemyBoard.getViewForEnemy)
+    enemyBoard.shotOn(position)
   }
 }
